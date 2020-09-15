@@ -1,0 +1,116 @@
+\documentclass{fit-teorsem}
+
+%-------------------------------------------------------------------------------
+%                 Fill in seminar information
+%-------------------------------------------------------------------------------
+\lecturername{Ondřej Kvapil}
+\lectureremail{kvapiond@fit.cvut.cz}
+\papertitle{Complexity of correspondence $H$-colourings}
+\paperauthors{Tomás Feder, Pavol Hell}
+\paperlink{https://www.sciencedirect.com/science/article/abs/pii/S0166218X19305128}
+
+%-------------------------------------------------------------------------------
+%                 Use custom packages
+%-------------------------------------------------------------------------------
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{tikz}
+\usetikzlibrary{arrows,cd,positioning,shapes}
+
+\tikzset{
+	reflexive dot/.style={loop,looseness=17,in=130,out=50},
+	reflexive above/.style={->,loop,looseness=7,in=120,out=60},
+	reflexive below/.style={->,loop,looseness=7,in=240,out=300},
+	reflexive left/.style={->,loop,looseness=7,in=150,out=210},
+	reflexive right/.style={->,loop,looseness=7,in=30,out=330}
+}
+
+\begin{document}
+%-------------------------------------------------------------------------------
+%                 Print seminar header
+%-------------------------------------------------------------------------------
+\maketsheader
+%-------------------------------------------------------------------------------
+%                 Create your content!
+%-------------------------------------------------------------------------------
+\thispagestyle{empty}
+
+\begin{description}
+	\item[homomorphism] of a graph $G$ to a graph $H$ is a mapping of the vertex sets $f : V(G) \to V(H)$ 
+		that preserves edges, i.e. if $uv$ is an edge of $G$ then $f(u)f(v)$ is an edge of $H$.
+	\item[edge-labelled graph] is a graph $G$ together with a mapping (\textit{edge-labelling})
+		$\ell : E(G) \to P(H) \times P(H)$, where $P(H)$ denotes the set of all permutations of $V(H)$ 
+		and $H$ is a fixed graph (chosen apriori). The label $\ell(xy)$ of an edge $xy$ of $G$ is a pair
+		$(\pi, \rho)$ of permutations of $V(H)$, where the permutation $\pi$ is associated with $x$ and
+		the permutation $\rho$ with $y$.
+	\item[$G$-transversal] of a product $G \times H$ is an induced subgraph $S$ of $G \times H$
+		containing exactly one vertex $v_x$ from each set $V_x$ such that the mapping $x \to v_x$
+		is an isomorphism of $G$ and $S$. A set $V_x$ is defined as follows:
+		$\forall x \in V(G): V_x = \{x\} \times V(H)$.
+	\item[correspondence homomorphism] of an edge-labelled graph $G, \ell$ to a graph $H$ is a mapping
+		\hbox{$f : V(G) \to V(H)$} such that if $xy \in E(G)$ with $\ell(xy) = (\pi, \rho)$,
+		then $\pi(f(x)) \rho(f(y)) \in E(H)$. A correspondence homomorphism of $G, \ell$ to $H$
+		will also be called a \textit{correspondence $H$-colouring of $G, \ell$}.
+
+		\begin{tikzpicture}
+			\node (VG) {$V(G)$};
+			\node (VH) [right=of VG] {$V(H)$};
+			\draw [->] (VG.east) -- node [above] {$f$} (VH.west);
+			\path [->] (VH) edge [reflexive above] node [above] {$\pi$}
+				coordinate [xshift = 0.5em, yshift =  0.5em] (pi) (VH);
+			\path [->] (VH) edge [reflexive below] node [below] {$\rho$}
+				coordinate [xshift = 0.5em, yshift = -0.5em] (rho) (VH);
+
+			\node (PHPH) [right=of VH] {$P(H) \times P(H)$};
+			\node (EG) [right=of PHPH] {$E(G)$};
+			%\node (EH) [right=of EG] {$E(H)$};
+			\draw [->] (EG.west) -- node [above] {$\ell$} (PHPH.east);
+			\draw [->, shorten <= 2pt] (PHPH.west) -- node [above] {$fst$} (pi);
+			\draw [->, shorten <= 2pt] (PHPH.west) -- node [below] {$snd$} (rho);
+		\end{tikzpicture}
+
+	\item[product of graphs] $G$ and $H$ is the graph $G \times H$ with a vertex set $V(G) \times V(H)$
+		where the vertex $(x, u)$ is adjacent to the vertex $(y, v)$ if and only if
+		$xy \in E(G) \land uv \in E(H)$. This definition is often referred to as the tensor
+		product of graphs or the category-theoretical product of graphs.
+
+		%\directlua{
+		%	tex.print "hello"
+		%}
+		\begin{tikzpicture}[
+			dot/.style = {circle, minimum size = 1mm, inner sep = 0mm, draw = black},
+		]
+			\def\gLen{4}
+			\foreach\i in {1,...,\gLen}{
+				\pgfmathparse{int(\gLen - \i + 1)}
+				\let\y\pgfmathresult
+				\node [dot]  (\i) at (0.5, \y) [label = right:$\i$] {};
+				\foreach\letter in {a,b,c}{
+					\node [dot] (\letter\i) at (2, \y) {$\pgfmathresult$};
+				}
+				%\node [dot] (b\i) at (3, \y) {};
+
+				\pgfmathparse{int(\i - 1)}
+				\let\target\pgfmathresult
+				\ifnum\i=1
+					% no op
+				\else
+					\foreach\letter in {a,b,c}{
+						\draw (\letter\i.north) -- (\letter\target.south);
+					}
+					\draw  (\i.north) --  (\target.south);
+				\fi
+			}
+
+			\node [dot] (a) at (2, 0) [label = below:$a$] {};
+			\path (a) edge [reflexive dot] (a);
+			\node [dot] (b) at (3, 0) [label = below:$b$] {};
+			\path (b) edge [reflexive dot] (b);
+			\node [dot] (c) at (4, 0) [label = below:$c$] {};
+			\path (c) edge [reflexive dot] (c);
+			\path (b) edge (c);
+		\end{tikzpicture}
+\end{description}
+
+\end{document}
